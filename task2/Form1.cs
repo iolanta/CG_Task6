@@ -75,14 +75,14 @@ namespace task2
 
         private void button1_Click(object sender, EventArgs e)
         {
-            DiamondSquare d = new DiamondSquare(512, 100, 5);
+            DiamondSquare d = new DiamondSquare(512, trackBar1.Value, 5);
             double[,] map = d.getData();
             drawMap(d, map);
         }
 
         private void button2_Click(object sender, EventArgs e)
         {
-            DiamondSquare d = new DiamondSquare(512, 100, 5);
+            DiamondSquare d = new DiamondSquare(512, trackBar1.Value, 5);
 
             double[][,] map = d.getDataStepByStep();
             for (int j = 0; j < d.countSteps(); j++)
@@ -91,6 +91,16 @@ namespace task2
                 pictureBox1.Refresh();
                 System.Threading.Thread.Sleep(500);
             }
+        }
+
+        private void trackBar1_Scroll(object sender, EventArgs e)
+        {
+            label1.Text = String.Format("roughness value: {0}", trackBar1.Value);
+        }
+
+        private void Form1_Load(object sender, EventArgs e)
+        {
+
         }
     }
 
