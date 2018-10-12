@@ -11,18 +11,6 @@ using System.Drawing.Drawing2D;
 
 namespace CG_Task6
 {
-    public class Frac_point
-    {
-        public PointF p;
-        public List<Frac_point> fpoints;
-        
-        public Frac_point(PointF _p)
-        {
-            p = _p;
-            fpoints = new List<Frac_point>();
-        }
-    }
-
     public partial class Form1 : Form
     {
         char start_sym;
@@ -32,7 +20,6 @@ namespace CG_Task6
         char[] list_n;
         string fractal;
         int depth;
-        GraphicsPath path;
         Frac_point start_node;
         PointF max_p, min_p;
 
@@ -41,11 +28,10 @@ namespace CG_Task6
             InitializeComponent();
             turn_angle = 0;
             rules = new Dictionary<char, string>();
-            depth = 5;
-            path = new GraphicsPath();
             start_node = new Frac_point(new PointF(0, 0));
             max_p = new PointF(0, 0);
             min_p = new PointF(0, 0);
+            depth = 5;
         }
 
         private void parse_input(string str)
@@ -150,16 +136,36 @@ namespace CG_Task6
 
         private void button1_Click(object sender, EventArgs e)
         {
-            openFileDialog1.ShowDialog();
+            if (openFileDialog1.ShowDialog() != DialogResult.OK)
+                return;
+            
             string filename = openFileDialog1.FileName;
             string fileText = System.IO.File.ReadAllText(filename);
             fileText = fileText.Replace(" ", string.Empty);
+            rules.Clear();
+            start_node = new Frac_point(new PointF(0, 0));
+            max_p = new PointF(0, 0);
+            min_p = new PointF(0, 0);
+            start_dir = "";
+
             parse_input(fileText);
             apply_rules();
             create_fractal();
             pictureBox1.Invalidate();
         }
-        
+
+        private void numericUpDown1_ValueChanged(object sender, EventArgs e)
+        {
+            depth = (int)numericUpDown1.Value;
+            start_node = new Frac_point(new PointF(0, 0));
+            max_p = new PointF(0, 0);
+            min_p = new PointF(0, 0);
+
+            apply_rules();
+            create_fractal();
+            pictureBox1.Invalidate();
+        }
+
         private void pictureBox1_Paint(object sender, PaintEventArgs e)
         {
 
@@ -187,6 +193,18 @@ namespace CG_Task6
                     s.Push(fp);
                 }
             }
+        }
+    }
+
+    public class Frac_point
+    {
+        public PointF p;
+        public List<Frac_point> fpoints;
+
+        public Frac_point(PointF _p)
+        {
+            p = _p;
+            fpoints = new List<Frac_point>();
         }
     }
 }
