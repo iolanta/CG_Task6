@@ -31,7 +31,7 @@ namespace CG_Task6
             start_node = new Frac_point(new PointF(0, 0));
             max_p = new PointF(0, 0);
             min_p = new PointF(0, 0);
-            depth = 5;
+            depth = 2;
         }
 
         private void parse_input(string str)
@@ -157,10 +157,12 @@ namespace CG_Task6
         private void numericUpDown1_ValueChanged(object sender, EventArgs e)
         {
             depth = (int)numericUpDown1.Value;
+            if (fractal == null)
+                return;
             start_node = new Frac_point(new PointF(0, 0));
             max_p = new PointF(0, 0);
             min_p = new PointF(0, 0);
-
+            
             apply_rules();
             create_fractal();
             pictureBox1.Invalidate();
@@ -171,13 +173,13 @@ namespace CG_Task6
 
             float w = max_p.X - min_p.X;
             float h = min_p.Y - min_p.Y;
-            var scale = Math.Min((float)(pictureBox1.Width - 50) / w, (float)(pictureBox1.Height - 50) / h);
-            if (w == 0 || h == 0)
+            var scale = Math.Min((float)(pictureBox1.Width-200) / w, (float)(pictureBox1.Height - 200) / h);
+            if (w == 0 && h == 0)
                 scale = 1;
             // Перемещаем (0, 0) в центр окна и устанавливаем масштаб
-            e.Graphics.TranslateTransform(pictureBox1.Width / 2, pictureBox1.Height / 2);
+            //e.Graphics.TranslateTransform(pictureBox1.Width / 2, pictureBox1.Height / 2);
             e.Graphics.ScaleTransform(scale, scale);
-            e.Graphics.TranslateTransform(-min_p.X - w / 2, -min_p.Y - h / 2);
+            e.Graphics.TranslateTransform(-min_p.X,-min_p.Y);
 
             // Рисуем фрактал
             var p = new Pen(Color.Black);
