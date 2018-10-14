@@ -13,9 +13,9 @@ namespace CG_Task6
 {
     public partial class Form1 : Form
     {
-        char start_sym;
         double turn_angle;
-        string start_dir;
+        double start_angle;
+        string start;
         Dictionary<char, string> rules;
         char[] list_n;
         string fractal;
@@ -27,6 +27,7 @@ namespace CG_Task6
         {
             InitializeComponent();
             turn_angle = 0;
+            start_angle = 0;
             rules = new Dictionary<char, string>();
             start_node = new Frac_point(new PointF(0, 0));
             max_p = new PointF(0, 0);
@@ -38,20 +39,30 @@ namespace CG_Task6
         {
             string[] lst = str.Split(new string[] { "\r\n", "\r" }, StringSplitOptions.RemoveEmptyEntries);
             list_n = new char[lst.GetLength(0)-1];
-            start_sym = lst[0][0];
-            int index = 1;
+            int index = 0;
             int angle = 0;
-            while (char.IsDigit(lst[0][index]))
+
+            while (!char.IsDigit(lst[0][index]))
+            {
+                start += lst[0][index];
+                ++index;
+            }
+            
+            while (!char.IsSymbol(lst[0][index]))
             {
                 angle = angle * 10 + (int)(lst[0][index] - '0');
                 ++index;
             }
             turn_angle = angle * Math.PI / 180;
-            
-            while(index != lst[0].Length) {
-                start_dir += lst[0][index];
+
+            angle = 0;
+            ++index;
+            while(!char.IsSymbol(lst[0][index]))
+            {
+                angle = angle * 10 + (int)(lst[0][index] - '0');
                 ++index;
             }
+            start_angle = angle * Math.PI / 180;
 
             for (int i = 1; i < lst.GetLength(0); ++i)
             {
@@ -81,7 +92,7 @@ namespace CG_Task6
         
         private void apply_rules()
         {
-            fractal = start_dir;
+            fractal = start;
             int d = depth;
             int i = 0;
             while(d != 0) 
@@ -105,7 +116,7 @@ namespace CG_Task6
             Frac_point cur = start_node;
             Stack<Tuple<Frac_point, double>> st = new Stack<Tuple<Frac_point, double>>();
 
-            double angle = 0;
+            double angle = start_angle;
             foreach(char c in fractal)
             {
                 if (c == '+')
@@ -146,7 +157,7 @@ namespace CG_Task6
             start_node = new Frac_point(new PointF(0, 0));
             max_p = new PointF(0, 0);
             min_p = new PointF(0, 0);
-            start_dir = "";
+            start = "";
 
             parse_input(fileText);
             apply_rules();
@@ -173,7 +184,7 @@ namespace CG_Task6
 
             float w = max_p.X - min_p.X;
             float h = min_p.Y - min_p.Y;
-            var scale = Math.Min((float)(pictureBox1.Width-200) / w, (float)(pictureBox1.Height - 200) / h);
+            var scale = Math.Min((float)(pictureBox1.Width - 200) / w, (float)(pictureBox1.Height - 200) / h);
             if (w == 0 && h == 0)
                 scale = 1;
             // Перемещаем (0, 0) в центр окна и устанавливаем масштаб
