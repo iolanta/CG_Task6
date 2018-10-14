@@ -183,14 +183,14 @@ namespace CG_Task6
         {
 
             float w = max_p.X - min_p.X;
-            float h = min_p.Y - min_p.Y;
-            var scale = Math.Min((float)(pictureBox1.Width - 200) / w, (float)(pictureBox1.Height - 200) / h);
-            if (w == 0 && h == 0)
+            float h = max_p.Y - min_p.Y;
+            var scale = Math.Min((float)(pictureBox1.Width-75) / w, (float)(pictureBox1.Height- 75) / h);
+            if (w == 0 || h == 0)
                 scale = 1;
             // Перемещаем (0, 0) в центр окна и устанавливаем масштаб
             //e.Graphics.TranslateTransform(pictureBox1.Width / 2, pictureBox1.Height / 2);
             e.Graphics.ScaleTransform(scale, scale);
-            e.Graphics.TranslateTransform(-min_p.X,-min_p.Y);
+            e.Graphics.TranslateTransform(-min_p.X+50/scale,-min_p.Y + 50 / scale);
 
             // Рисуем фрактал
             var p = new Pen(Color.Black);
