@@ -130,7 +130,7 @@ namespace CG_Task6
                     cur = t.Item1;
                     angle = t.Item2;
                 }
-                else
+                else if(c == 'F')
                 {
                     PointF next = new PointF(cur.p.X + (float)Math.Cos(angle) * 10, cur.p.Y + (float)Math.Sin(angle) * 10);
                     min_p.X = Math.Min(min_p.X, next.X);

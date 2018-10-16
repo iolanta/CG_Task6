@@ -12,7 +12,7 @@ namespace task3
 {
     public partial class Form1 : Form
     {
-        private PointF p0,p1,p2,p3;
+        //private PointF p0,p1,p2,p3;
         private BindingList<CurvePoint> plist = new BindingList<CurvePoint>();
 
         private void pictureBox1_Paint(object sender, PaintEventArgs e)
@@ -28,46 +28,51 @@ namespace task3
             if (plist.Count > 1) 
                 e.Graphics.DrawLines(dashed, plist.Select(p => { return p.location; }).ToArray());
 
-            for (int i = 1; i < plist.Count - 2; i+=2)
+            for (int i = 1; i < plist.Count-1; i+=2)
             {
                 PointF p0,p1,p2,p3;
 
                 int prev = i - 1; // p0
                 int next = i + 2; // p3 
-                if (next >= plist.Count)
-                    break;
+
                 if (prev == 0)
                     p0 = plist[prev].location;
                 else
                     p0 = new PointF((plist[i].location.X + plist[prev].location.X) / 2, (plist[i].location.Y + plist[prev].location.Y) / 2);
-                p1 = plist[i].location;
-                p2 = plist[i + 1].location;
 
-                if (next == plist.Count() - 1) 
-                    p3 = plist[next].location;
-                else
-                    p3 = new PointF((plist[i+1].location.X + plist[next].location.X) / 2, (plist[i+1].location.Y + plist[next].location.Y) / 2);
 
+
+                if (i == plist.Count - 1)
+                {
+                    p3 = plist[i].location;
+                    var dif = new PointF((p3.X - p0.X) / 3, (p3.Y - p0.Y) / 3);
+                    p1 = new PointF(p0.X + dif.X, p0.Y + dif.Y);
+                    p2 = new PointF(p3.X - dif.X, p3.Y - dif.Y);
+                }
+                else if (i == plist.Count - 2)
+                {
+                    p1 = plist[i].location;
+                    p3 = plist[i + 1].location;
+                    p2 = new PointF((p3.X + p1.X) / 2, (p3.Y + p1.Y) / 2);
+                }
+                else {
+                   p1 = plist[i].location;
+                   p2= plist[i + 1].location;
+                    if (next == plist.Count - 1)
+                        p3 = plist[next].location;
+                    else
+                        p3 = new PointF((plist[next].location.X + p2.X) / 2, (plist[next].location.Y + p2.Y) / 2);
+                }
+
+               
+
+               
                 e.Graphics.DrawLines(blackPen, calcalute_curve(p0,p1,p2,p3));
 
             }
 
-            return;
-
-            e.Graphics.DrawLines(blackPen, new PointF[] { p0, p1, p2, p3 });
-            e.Graphics.DrawEllipse(new Pen(Color.Black), p0.X - (float)1.5, p0.Y - (float)1.5, 3, 3);
-            e.Graphics.DrawEllipse(new Pen(Color.Black), p1.X - (float)1.5, p1.Y - (float)1.5, 3, 3);
-            e.Graphics.DrawEllipse(new Pen(Color.Black), p2.X - (float)1.5, p2.Y - (float)1.5, 3, 3);
-            e.Graphics.DrawEllipse(new Pen(Color.Black), p3.X - (float)1.5, p3.Y - (float)1.5, 3, 3);
-            e.Graphics.DrawString("P0", font, br, p0);
-            e.Graphics.DrawString("P1", font, br, p1);
-            e.Graphics.DrawString("P2", font, br, p2);
-            e.Graphics.DrawString("P3", font, br, p3);
-           
-
-            List<PointF> l = new List<PointF>();
-           
-            e.Graphics.DrawLines(new Pen(Color.Aquamarine,2), l.ToArray());
+            
+            
 
             
         }
@@ -90,7 +95,8 @@ namespace task3
 
         private void pictureBox1_MouseDown(object sender, MouseEventArgs e)
         {
-            (comboBox1.SelectedItem as CurvePoint).location = e.Location;
+            if (comboBox1.SelectedIndex != -1)
+                (comboBox1.SelectedItem as CurvePoint).location = e.Location;
             pictureBox1.Invalidate();
         }
 
