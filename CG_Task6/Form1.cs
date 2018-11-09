@@ -22,6 +22,9 @@ namespace CG_Task6
         int depth;
         Frac_point start_node;
         PointF max_p, min_p;
+        bool rand_turn;
+        Random rand_ang = new Random();
+        int max_lvl = 0;
 
         public Form1()
         {
@@ -32,7 +35,8 @@ namespace CG_Task6
             start_node = new Frac_point(new PointF(0, 0));
             max_p = new PointF(0, 0);
             min_p = new PointF(0, 0);
-            depth = 2;
+            depth = 2; 
+            rand_turn = false;
         }
 
         private void parse_input(string str)
@@ -115,23 +119,46 @@ namespace CG_Task6
         {
             Frac_point cur = start_node;
             Stack<Tuple<Frac_point, double>> st = new Stack<Tuple<Frac_point, double>>();
+            int lvl = 0;
 
             double angle = start_angle;
             foreach(char c in fractal)
             {
                 if (c == '+')
-                    angle += turn_angle;
+                {
+                    if (rand_turn)
+                        angle += turn_angle + (rand_ang.Next(-20, 20) * Math.PI / 180);
+                    else
+                        angle += turn_angle;
+                    ++lvl;
+                }
                 else if (c == '-')
-                    angle -= turn_angle;
+                {
+                    if (rand_turn)
+                        angle -= turn_angle + (rand_ang.Next(-20, 20) * Math.PI / 180);
+                    else
+                        angle -= turn_angle;
+                    ++lvl;
+                }
+
                 else if (c == '[')
+                {
                     st.Push(new Tuple<Frac_point, double>(cur, angle));
-                else if (c == ']') {
+                }
+                else if (c == ']')
+                {
                     var t = st.Pop();
+                    lvl = t.Item1.level;
                     cur = t.Item1;
                     angle = t.Item2;
                 }
-                else if(c == 'F')
+                else if (c == '@')
                 {
+                    rand_turn = true;
+                }
+                else if (c == 'F')
+                {
+                    max_lvl = Math.Max(max_lvl, lvl);
                     PointF next = new PointF(cur.p.X + (float)Math.Cos(angle) * 10, cur.p.Y + (float)Math.Sin(angle) * 10);
                     min_p.X = Math.Min(min_p.X, next.X);
                     min_p.Y = Math.Min(min_p.Y, next.Y);
@@ -139,6 +166,7 @@ namespace CG_Task6
                     max_p.Y = Math.Max(max_p.Y, next.Y);
 
                     Frac_point t = new Frac_point(next);
+                    t.level = lvl;
                     cur.fpoints.Add(t);
                     cur = t;
                 }
@@ -179,6 +207,50 @@ namespace CG_Task6
             pictureBox1.Invalidate();
         }
 
+        private static int[] Interpolate(int i0, int d0, int i1, int d1)
+        {
+            if (i0 == i1)
+            {
+                return new int[] { d0 };
+            }
+            int[] res;
+            float a = (float)(d1 - d0) / (i1 - i0);
+            float val = d0;
+            res = new int[i1 - i0 + 1];
+            d1 = 0;
+            for (int i = i0; i <= i1; i++)
+            {
+                res[d1] = d0;
+                val += a;
+                d0 = (int)val;
+                ++d1;
+            }
+
+            return res;
+        }
+
+        private static float[] FInterpolate(int i0, float d0, int i1, float d1)
+        {
+            if (i0 == i1)
+            {
+                return new float[] { d0 };
+            }
+            float[] res;
+            float a = (d1 - d0) / (i1 - i0);
+            float val = d0;
+            res = new float[i1 - i0 + 1];
+            int ind =  0;
+            for (int i = i0; i <= i1; i++)
+            {
+                res[ind] = val;
+                val += a;
+                ++ind;
+            }
+
+            return res;
+        }
+
+
         private void pictureBox1_Paint(object sender, PaintEventArgs e)
         {
 
@@ -188,21 +260,26 @@ namespace CG_Task6
             if (w == 0 || h == 0)
                 scale = 1;
             // Перемещаем (0, 0) в центр окна и устанавливаем масштаб
-            //e.Graphics.TranslateTransform(pictureBox1.Width / 2, pictureBox1.Height / 2);
             e.Graphics.ScaleTransform(scale, scale);
             e.Graphics.TranslateTransform(-min_p.X+50/scale,-min_p.Y + 50 / scale);
 
-            // Рисуем фрактал
-            var p = new Pen(Color.Black);
-            
+            Color c1 = Color.DeepPink;
+            Color c2 = Color.DeepSkyBlue;
+            float sw = 5f;
+            float fw = 0.1f;
+            int[] R = Interpolate(0, c1.R, max_lvl, c2.R);
+            int[] G = Interpolate(0, c1.G, max_lvl, c2.G);
+            int[] B = Interpolate(0, c1.B, max_lvl, c2.B);
+            float[] W = FInterpolate(0, sw, max_lvl, fw);
+
             Stack<Frac_point> s = new Stack<Frac_point>();
             s.Push(start_node);
-            while (s.Count>0)
+            while (s.Count > 0)
             {
                 Frac_point cur = s.Pop();
                 foreach(var fp in cur.fpoints)
                 {
-                    e.Graphics.DrawLine(p, cur.p, fp.p);
+                    e.Graphics.DrawLine(new Pen(Color.FromArgb(R[cur.level], G[cur.level], B[cur.level]), W[cur.level]), cur.p, fp.p);
                     s.Push(fp);
                 }
             }
@@ -213,6 +290,7 @@ namespace CG_Task6
     {
         public PointF p;
         public List<Frac_point> fpoints;
+        public int level;
 
         public Frac_point(PointF _p)
         {
